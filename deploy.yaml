@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/podIP: 10.0.0.44/32
+    cni.projectcalico.org/podIPs: 10.0.0.44/32
+  creationTimestamp: "2020-03-26T13:42:12Z"
+  generateName: department-598474f8f9-
+  labels:
+    app: department
+    pod-template-hash: 598474f8f9
+  name: department-598474f8f9-gjd7c
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: department-598474f8f9
+    uid: b48c4dd8-0c44-4f9c-af62-a16f8c471d00
+  resourceVersion: "7600381"
+  selfLink: /api/v1/namespaces/default/pods/department-598474f8f9-gjd7c
+  uid: d97a81fe-dc1a-4738-88d8-445291fac164
+spec:
+  containers:
+  - image: joshrosso/ds:1.0.15
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 5
+      httpGet:
+        path: /actuator/info
+        port: 8080
+        scheme: HTTP
+      initialDelaySeconds: 60
+      periodSeconds: 20
+      successThreshold: 1
+      timeoutSeconds: 2
+    name: department
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 5
+      httpGet:
+        path: /actuator/health
+        port: 8080
+        scheme: HTTP
+      initialDelaySeconds: 60
+      periodSeconds: 20
+      successThreshold: 1
+      timeoutSeconds: 2
+    resources:
+      limits:
+        cpu: "1"
+        memory: 300Mi
+      requests:
+        cpu: 200m
+        memory: 300Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/secretspot
+      name: mongodb
+    - mountPath: /etc/appconfig
+      name: config
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-r8r22
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: worker-3
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: mongodb
+    secret:
+      defaultMode: 420
+      secretName: department
+  - configMap:
+      defaultMode: 420
+      name: department
+    name: config
+  - name: default-token-r8r22
+    secret:
+      defaultMode: 420
+      secretName: default-token-r8r22
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-26T13:42:12Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-26T13:43:32Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-26T13:43:32Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-26T13:42:12Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://14685e6182e9827a73fc401fc681fd41b058eae8ce0d8c74fe7db7f5e080aff1
+    image: joshrosso/ds:1.0.15
+    imageID: docker-pullable://joshrosso/ds@sha256:2b348913a9b7ea7be68f0945a5f00529167ea03578d501073e74f3060e37a3af
+    lastState: {}
+    name: department
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2020-03-26T13:42:13Z"
+  hostIP: 192.168.201.3
+  phase: Running
+  podIP: 10.0.0.44
+  podIPs:
+  - ip: 10.0.0.44
+  qosClass: Burstable
+  startTime: "2020-03-26T13:42:12Z"

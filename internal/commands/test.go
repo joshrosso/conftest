@@ -146,9 +146,12 @@ func NewTestCommand(ctx context.Context) *cobra.Command {
 
 			files, err := parseFileList(fileList)
 			if err != nil {
-				return fmt.Errorf("parse files: %w", err)
+				return fmt.Errorf("parse files: %w\n", err)
 			}
 
+			// Appears to load up file here (e.g. yaml file to review)
+
+			fmt.Printf("files: %s\n", files)
 			configurations, err := parser.GetConfigurations(ctx, input, files)
 			if err != nil {
 				return fmt.Errorf("get configurations: %w", err)
@@ -156,6 +159,8 @@ func NewTestCommand(ctx context.Context) *cobra.Command {
 
 			policyPath := viper.GetString("policy")
 			urls := viper.GetStringSlice("update")
+
+			// downloads policies remotely if available
 			for _, url := range urls {
 				sourcedURL, err := policy.Detect(url, policyPath)
 				if err != nil {
@@ -167,15 +172,25 @@ func NewTestCommand(ctx context.Context) *cobra.Command {
 				}
 			}
 
+			// gets paths to rego files
+
 			regoFiles, err := policy.ReadFiles(policyPath)
 			if err != nil {
 				return fmt.Errorf("read rego files: %w", err)
 			}
+			fmt.Printf("rego files: %s\n", regoFiles)
+
+			// BuildCompiler compiles all of the given Rego policies
+			// and returns the Compiler containing the compilation state
 
 			compiler, err := policy.BuildCompiler(regoFiles)
 			if err != nil {
 				return fmt.Errorf("build compiler: %w", err)
 			}
+
+			// StoreFromDataFiles returns an Open Policy Agent Store with the
+			// loaded documents found in the paths. Any JSON or YAML document
+			// could be a valid document.
 
 			dataPaths := viper.GetStringSlice("data")
 			store, err := policy.StoreFromDataFiles(dataPaths)
@@ -361,8 +376,12 @@ func (t TestRun) runMultipleQueries(ctx context.Context, query string, inputs in
 }
 
 func (t TestRun) runQuery(ctx context.Context, query string, input interface{}) ([]Result, []Result, error) {
+
+	fmt.Printf("query was %s\n", query)
+	fmt.Printf("input was %s\n", input)
 	rego, stdout := t.buildRego(viper.GetBool("trace"), query, input)
 	resultSet, err := rego.Eval(ctx)
+	fmt.Printf("result set %s\n", resultSet)
 	if err != nil {
 		return nil, nil, fmt.Errorf("evaluating policy: %w", err)
 	}
